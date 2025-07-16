@@ -1,0 +1,17 @@
+car
+train
+aircraft
+barge
+ship
+bus
+tram
+truck
+lorry
+helicopter
+motor scooter
+vehicle
+bulk carrier
+ferry
+coach
+tractor
+tanker
