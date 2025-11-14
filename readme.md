@@ -1,4 +1,4 @@
-[Link](notebook/Fossilfree.ipynb)
+[Link](notebook/Example.ipynb)
 
 fossilfree_ecoinvent
 
