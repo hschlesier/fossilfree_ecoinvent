@@ -26,3 +26,6 @@ pitch
 methanol
 coal tar
 peat
+coal, aluminium industry
+natural gas, aluminium industry
+water pump operation, diesel

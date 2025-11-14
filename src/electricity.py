@@ -71,8 +71,8 @@ def roof_pv_market_setup(database, location, transformation_losses, altered_acti
     return altered_activities, market_code
 
 
-def add_storage_to_pv_market(database, location, phi, numb_cycles, discharge_depth,
-                             nu_turnaround, d, db_dict, market_code, input_map, ei_version, altered_activities):
+def add_storage_to_pv_market(database, location, phi, numb_cycles, discharge_depth, 
+                             nu_turnaround, d, nu_fuel_cell, db_dict, market_code, input_map, ei_version, altered_activities):
     """
     This adds storage to the pv market according to the specified ratio of storage type and technological input values. 
     It also creates market for PV including storage for low, medium and high voltage based on transformation processes to higher voltage
@@ -192,23 +192,13 @@ def add_storage_to_pv_market(database, location, phi, numb_cycles, discharge_dep
     
     #get inputs
     
-    #PEM operation
-    PEM_op = database.get(input_map[ei_version]['PEM_op'])
-    PEM_op_loc, db_dict = regionalise_activity(PEM_op, location, database, db_dict, priorities) #regionalize electricity
-    PEM_maintenance_exc_dict = {'input': PEM_op_loc.key, 'name': PEM_op_loc['name'], 'amount': 3.6*10**-7, 'uncertainty type':0,
-                        'unit': PEM_op_loc['unit'], 'location': location, 'type':'technosphere'}
-    
-    #Fuel Cell PEM
-    PEM_fuel_cell = database.get(input_map[ei_version]['PEMFC'])
-    PEM_fuel_cell_exc_dict = {'input': PEM_fuel_cell.key, 'name': PEM_fuel_cell['name'], 'amount': 10**-7, 'uncertainty type':0,
-                        'unit': PEM_fuel_cell['unit'], 'location': location, 'type':'technosphere'}
     #Fuel Cell Solid oxide
     SO_fuel_cell = database.get(input_map[ei_version]['SOFC'])
-    SO_fuel_cell_exc_dict = {'input': SO_fuel_cell.key, 'name': SO_fuel_cell['name'], 'amount': 10**-7, 'uncertainty type':0,
+    SO_fuel_cell_exc_dict = {'input': SO_fuel_cell.key, 'name': SO_fuel_cell['name'], 'amount': 2*10**-7, 'uncertainty type':0,
                         'unit': SO_fuel_cell['unit'], 'location': location, 'type':'technosphere'}
     
     SO_maintenance = database.get(input_map[ei_version]['SOFC_maintenance'])
-    SO_maintenance_exc_dict = {'input': SO_maintenance.key, 'name': SO_maintenance['name'], 'amount': 3.6*10**-7, 'uncertainty type':0,
+    SO_maintenance_exc_dict = {'input': SO_maintenance.key, 'name': SO_maintenance['name'], 'amount': 7.2*10**-7, 'uncertainty type':0,
                         'unit': SO_maintenance['unit'], 'location': location, 'type':'technosphere'}
     
     #Hydrogen refuelling station
@@ -216,17 +206,22 @@ def add_storage_to_pv_market(database, location, phi, numb_cycles, discharge_dep
     station_exc_dict = {'input': station.key, 'name': station['name'], 'amount': 1.15*10**-7, 'uncertainty type':0,
                         'unit': station['unit'], 'location': location, 'type':'technosphere'}
     #Hydrogen, 700 bars
-    hydrogen_25bar_base = database.get(input_map[ei_version]['H25bar'])
+    hydrogen_25bar_base = database.get(input_map[ei_version]['H25bar2'])
     hydrogen_25bar, db_dict = regionalise_activity(hydrogen_25bar_base, location, database, db_dict, priorities)
     
     hydrogen_700bar_base = database.get(input_map[ei_version]['H700bar'])
     hydrogen_700bar, db_dict = regionalise_activity(hydrogen_700bar_base, location, database, db_dict, priorities) #regionalize hydrogen
-    hydrogen_exc_dict  = {'input':(hydrogen_700bar['database'], hydrogen_700bar['code']), 'name': hydrogen_700bar['name'], 'amount': 0.06, 'uncertainty type':0,
+    hydrogen_exc_dict  = {'input':(hydrogen_700bar['database'], hydrogen_700bar['code']), 'name': hydrogen_700bar['name'],
+                           'amount': (1/39.4)/nu_fuel_cell, 'uncertainty type':0,
                         'unit': hydrogen_700bar['unit'], 'location': location, 'type':'technosphere'}
     
+    self_exc_dict = {'input':(H2_storage['database'], H2_storage['code']), 'name': H2_storage['name'],
+                           'amount': 1, 'uncertainty type':0, 'reference product': H2_storage['reference product'],
+                        'unit': H2_storage['unit'], 'location': H2_storage['location'], 'type':'production'}
+    
     #add exchanges
-    exc_dicts = [station_exc_dict, hydrogen_exc_dict, PEM_fuel_cell_exc_dict,
-                 SO_fuel_cell_exc_dict, PEM_maintenance_exc_dict, SO_maintenance_exc_dict]
+    exc_dicts = [self_exc_dict, station_exc_dict, hydrogen_exc_dict,
+                 SO_fuel_cell_exc_dict, SO_maintenance_exc_dict]
     
     [H2_storage.new_exchange(**exc_dict).save() for exc_dict in exc_dicts]
     
@@ -357,7 +352,7 @@ def not_null_split_only(activities, electricity_split):
     Filters activities, where share in scaled market not zero.
     """
     for idx in indices(list(electricity_split.values()), 0, '=='):
-        keywords = dic[list(dic.keys())[idx]]
+        keywords = electricity_split[list(electricity_split.keys())[idx]]
         activities=[act for act in activities if not any([keyword in act['name'] for keyword in keywords])]        
     return activities
 
@@ -413,6 +408,7 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
 
                 if (ex_amount - new_ex_amount) != 0:
                     supply_shortage += ex_amount - new_ex_amount
+
         if supply_shortage!=0:
             voltage=','.join(source_act["reference product"].split(',')[:2])
             
@@ -476,7 +472,7 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
             #concentrated solar power
             solar_acts=[act for act in sub_database
                         if 'electricity production, solar' in act['name']
-                        and act["location"]==location]
+                        and (act["location"]==location or act["location"]=='RoW')]
             
             if electricity_productions==[]: #back to original location
                 location = old_location
@@ -485,6 +481,7 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
             pv_market = database.get(pv_and_stor_market_code)
             
             subs_acts=[[pv_market], wind_on_acts, wind_off_acts, hydro_acts, geothermal_acts, biomass_acts, nuclear_acts, solar_acts]
+
             
             if flatten(subs_acts)==[]: #if there are no electricity production processes (e.g. RER), take market group
                 try:
@@ -497,7 +494,6 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
                     else:
                         market_group = [act for act in database if 'market group for '+voltage==act['name']
                                                           and act['location']=='GLO'][0]
-                    
                 act.new_exchange(input=market_group.key,
                                      amount=supply_shortage,
                                      unit=market_group['unit'],
@@ -521,13 +517,13 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
                                          amount=mode_split/len(mode_acts),
                                          unit="kilowatt hour",
                                          type='technosphere').save()
-           
+                          
         altered_activities = track_changes(act, altered_activities, 'scaling')
     return altered_activities
     
 def check_all_non_electricity_activities(database, fossil_reduction_factor, fossil_identifiers, altered_activities):
     #check all non-electricity-activities in location for fossil electricity inputs and substitute with local electricity market
-    for act in [act for act in database if not 'kilowatt hour' in act['unit']]:    
+    for act in [act for act in database if 'kilowatt hour'!=act['unit']]:    
         altered_activities = substitute_electricity_in_activity(database, act, fossil_reduction_factor, fossil_identifiers, altered_activities)
     return altered_activities
 
@@ -580,7 +576,7 @@ def substitute_electricity_in_activity(database, act, fossil_reduction_factor, f
     altered_activities = track_changes(act, altered_activities, 'scaling')
     return altered_activities
 
-def check_all_electricity_activities_where_no_markets(database, locations, fossil_reduction_factor, fossil_identifiers, altered_activities):
+def check_all_electricity_activities_where_no_markets(database, fossil_reduction_factor, fossil_identifiers, market_locations, altered_activities):
     """
     Selecting all electricity-providing processes that do not have an electricity market and defossilizing consumers.
     
@@ -594,8 +590,8 @@ def check_all_electricity_activities_where_no_markets(database, locations, fossi
     
     """
     print("Scaling processes in locations without electricity markets.")
-    all_locations=set([act['location'] for act in database])
-    rest_locations = all_locations.difference(set(locations))
+    all_locations    = set([act['location'] for act in database])
+    rest_locations = all_locations.difference(set(market_locations))
     print("Found ", len(rest_locations), " to treat.")
     count=1
     for location in list(rest_locations):
@@ -617,7 +613,7 @@ def check_all_electricity_activities_where_no_markets(database, locations, fossi
     return altered_activities
 
 def treat_electricity_markets(database, locations, transformation_losses, phi, numb_cycles, discharge_depth, ei_version,
-                              nu_turnaround, d, fossil_reduction_factor, fossil_identifiers, altered_activities, electricity_split):
+                              nu_turnaround, d, nu_fuel_cell, fossil_reduction_factor, fossil_identifiers, altered_activities, electricity_split, scale_non_market_locations=True):
     """
     Defossilizing all electricity markets and and consumers of fossil-based electricity sources.
     
@@ -659,18 +655,18 @@ def treat_electricity_markets(database, locations, transformation_losses, phi, n
                                                                            altered_activities)
         altered_activities, pv_and_stor_market_code = add_storage_to_pv_market(database, location, phi,
                                                                                numb_cycles, discharge_depth,
-                                                                               nu_turnaround, d, db_dict,
+                                                                               nu_turnaround, d, nu_fuel_cell, db_dict,
                                                                                market_code, input_map, ei_version, altered_activities)
         altered_activities = scale_exchanges(database, location, fossil_reduction_factor, fossil_identifiers,
                                                  electricity_split, pv_and_stor_market_code, altered_activities)
         count+=1
     
     
-    if len(locations)>1: 
+    if len(locations)>1 and scale_non_market_locations: 
         altered_activities = check_all_non_electricity_activities(database, fossil_reduction_factor, fossil_identifiers, altered_activities)
 
-        altered_activities = check_all_electricity_activities_where_no_markets(database, locations, fossil_reduction_factor,
-                                                                               fossil_identifiers, altered_activities)
+        altered_activities = check_all_electricity_activities_where_no_markets(database, fossil_reduction_factor,
+                                                                               fossil_identifiers, locations, altered_activities)
     
     print("--------------------")
     print("Electricity defossilized!")

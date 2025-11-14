@@ -55,8 +55,8 @@ def treat_fossil_consumers(database, biosphere3, fossil_reduction_factor, synfue
                            fossil_refinery_processes, grouped_locations, altered_activities):
     #looking for all activities that produce a fossil material
     fossil_acts = [act for act in database if any([identifier==act['reference product'] for identifier in fossil_identifiers])
-                              and ('market for' in act['name']
-                              or  'market group for' in act['name'])
+                              and (('market for' in act['name']
+                              or  'market group for' in act['name']) or 'water pump operation' in act['name'])
                               and not 'generic' in act['name']]
     
     if len(fossil_acts)==0:

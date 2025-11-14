@@ -170,7 +170,7 @@ def relink_input_output(dataset, old_db_name, new_db_name):
         dataset.save()
     except:
         print(dataset)
-        raise Exception()
+        raise Exception(dataset.as_dict())
 
 def get_change_report(database, altered_activities):
     """
@@ -217,7 +217,7 @@ def checks_and_balances(db, biosphere3, base_db_name):
     from utils import adjust_uncertainties
     #Checks exchanges
     relink_exchanges_to_self(database   = db,
-                         old_db_name = [base_db_name, 'synfuels'],
+                         old_db_name = [base_db_name, 'lci-synfuels'],
                          new_db_name = db.name
                         )
     #Check if all production amounts are defined

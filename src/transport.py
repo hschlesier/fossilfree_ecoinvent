@@ -3,6 +3,7 @@ import bw2data as bd
 import numpy as np
 import warnings
 np.warnings = warnings
+from carculator import *
 import carculator as cc
 import carculator_truck as cct
 import bw2data as bd
@@ -52,33 +53,30 @@ def create_passenger_vehicles(car_year, database, ei_version, transport_location
             return
             
     if 'carculator db' not in list(bd.databases):    
-        cip = cc.CarInputParameters()
-        cip.static()  # iteratively use cip.stochastic() to create models based on a probability model
+        cip = CarInputParameters()
+        cip.static()
 
         scope = {'powertrain': ['BEV', 'FCEV'],
-                 'size': ['Small', 'Medium', 'Large'],
-                 'year': car_year}
-        dcts, array = cc.fill_xarray_from_input_parameters(cip, scope=scope)  # scope could be adjusted if needed/wanted
-        if len(car_year)>1:
-            array = array.interp(year=car_year, kwargs={'fill_value': 'extrapolate'})
-        cm = cc.CarModel(array, cycle='WLTC')
+                'size': ['Small', 'Medium', 'Large'],
+                'year': car_year}
+
+        dcts, array = fill_xarray_from_input_parameters(cip, scope=scope)
+        cm = CarModel(array, cycle='WLTC')
         cm.set_all()
-        
+
         ic = cc.InventoryCalculation(cm.array)
 
-        #export
         imp=ic.export_lci_to_excel(software_compatibility="brightway2",
                                directory=parent_dir/ 'data' /'artifacts',
                                ecoinvent_version=ei_version)
 
-        #import carculator db
         date=str(datetime.now())[:10]
         path = parent_dir/ 'data' /'artifacts' /'carculator_inventory_export_{}_brightway2.xlsx'.format(date)
 
         imp = bi.ExcelImporter(path)
         imp.apply_strategies()
         if ei_version!='3.8':
-            new_data = migrate_exchanges(imp.data.copy(), from_version='3.8', to_version='3.9')
+            new_data = migrate_exchanges(imp.data.copy(), from_version='3.8', to_version=ei_version)
             imp.data = new_data
         imp.match_database(database.name, fields=('name','unit','location',"reference product"))
         imp.match_database("biosphere3", fields=('name','unit',"categories"))

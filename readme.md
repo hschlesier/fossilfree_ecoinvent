@@ -1,8 +1,7 @@
 [Link](notebook/Fossilfree.ipynb)
 
-fossifree_ecoinvent
+fossilfree_ecoinvent
 
-This code ...
-
+"Fossil-free ecoinvent" allows you to generate partly or fully defossilized versions of Ecoinvent databases based on your parameter selection.
 
 <img src="logo.png" alt="Description of image" width="300">

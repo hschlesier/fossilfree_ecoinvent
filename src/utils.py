@@ -493,7 +493,7 @@ def crop_fuel(fuel):
     if 'pressure' in fuel:
         return fuel.replace(', vehicle grade','')
     else:
-        return fuel.replace(', low-sulfur','').replace(', unleaded','').replace(', two-stroke blend','')
+        return fuel.replace(', low-sulfur','').replace(', unleaded','').replace(', two-stroke blend','').replace(', diesel','')
 
 def check_bio_or_synfuel(rp, name):
     """
@@ -504,7 +504,7 @@ def check_bio_or_synfuel(rp, name):
     Returns:
             clas:  synfuel or biofuel as string
     """
-    if 'synthetic' in rp or 'electrolysis' in name or 'synthetic' in name:
+    if 'synthetic' in rp or 'electrolysis' in name or 'synthetic' in name or 'electric' in name:
         clas = 'syngen'
     elif 'bio' in rp or 'char' in rp or 'fermentation' in rp:
         clas = 'biogen' 
@@ -811,10 +811,13 @@ def migrate_flows(dataset, biosphere_map_dict, technosphere_map_dict):
 
 def get_biosphere3_map_dict(from_version='3.8', to_version='3.9'):
     parent_dir = Path.cwd().parent
-    match_df_raw = pd.read_excel(parent_dir/ 'data/raw/biosphere_flow_mapping.xlsx', sheet_name=to_version, index_col=0)
+    match_df_raw = pd.read_excel(parent_dir/ 'data/raw/biosphere_flow_mapping.xlsx', index_col=0)
     match_df_raw['categories'] = [eval(val) for val in match_df_raw['categories']]
-    match_df = match_df_raw.set_index(['{}_name'.format(from_version), 'categories']).iloc[:,1:][[col for col in match_df_raw.columns if to_version in col]].T
+    match_df = match_df_raw.set_index(['{}_name'.format(from_version), 'categories'])[['{}_name'.format(to_version), '{}_code'.format(to_version)]].T
     match_df.index = ['name', 'code']
+
+    match_df = match_df.loc[:, ~match_df.columns.duplicated()] #remove duplicated columns
+
     map_dict = match_df.to_dict()
     return map_dict
 

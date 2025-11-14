@@ -1,5 +1,4 @@
 {
-                "water pump operation, diesel": "water pump operation, electric",
                 "machine operation, diesel, < 18.64 kW, generators": "electricity, medium voltage",
                 "machine operation, diesel, < 18.64 kW, high load factor": "electricity, medium voltage",
                 "machine operation, diesel, < 18.64 kW, low load factor": "electricity, medium voltage",

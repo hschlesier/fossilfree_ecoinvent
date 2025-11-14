@@ -23,7 +23,7 @@ from electricity import treat_electricity_markets
 from transport import create_passenger_vehicles, create_lorries, delete_duplicates_in_carculator_db, add_new_diesel_market, treat_transport
 from heat import add_biocoke_market, treat_heat_markets
 from materials import treat_other_processes
-from utils import migrate_exchanges, import_fossil_identifiers, import_emission_factors, import_electrifiable_processes, import_synfuel_dict, import_not_electrifiable_fuels, import_fossil_refinery_processes, import_not_electrifiable_processes, import_group_locations
+from utils import migrate_exchanges, import_fossil_identifiers, import_emission_factors, import_electrifiable_processes, import_synfuel_dict, import_not_electrifiable_fuels, import_fossil_refinery_processes, import_not_electrifiable_processes, import_group_locations, import_input_map
 from checks_and_balances import checks_and_balances, get_change_report
 
 class FossilfreeDatabase:
@@ -52,7 +52,9 @@ class FossilfreeDatabase:
         heat_split: dict = None,
         electricity_split: dict = None,
         synfuel_split_dict: dict = None,
-        materials_fossil_reduction_factor: float = 0.0
+        materials_fossil_reduction_factor: float = 0.0,
+        electrolysis_efficiency: float = 0.85,
+        fuel_cell_efficiency: float = 0.5
     )-> None:
         #check electricity market locations
         if isinstance(electricity_location_string, str):
@@ -115,6 +117,8 @@ class FossilfreeDatabase:
                                          "Solar":         0.03}
         self.synfuel_split_dict       = {"biogen": 0.1, "syngen": 0.9}
         self.f_mat = materials_fossil_reduction_factor
+        self.nu_electrolysis = electrolysis_efficiency
+        self.nu_fuel_cell    = fuel_cell_efficiency
 
     def load_parameters(self, path=Path.cwd().parent, filename='input_parameters_v2.xlsx'):
         df = pd.read_excel(path / filename)
@@ -175,6 +179,8 @@ class FossilfreeDatabase:
         fuel_cell    =float(df.iloc[49,1])
 
         materials_fossil_reduction_factor = float(df.iloc[50,1])
+        electrolysis_efficiency           = float(df.iloc[51,1])
+        fuel_cell_efficiency         = float(df.iloc[52,1])
     
         # check input
         supported_versions = ['3.8', '3.9', '3.9.1']
@@ -192,6 +198,8 @@ class FossilfreeDatabase:
         assert (road_fossil_reduction_factor>=0        and road_fossil_reduction_factor<=1)
         assert (fossil_heat_reduction_factor>=0        and fossil_heat_reduction_factor<=1)
         assert (materials_fossil_reduction_factor>=0   and materials_fossil_reduction_factor<=1)
+        assert (electrolysis_efficiency>=0             and electrolysis_efficiency<=1)
+        assert (fuel_cell_efficiency>=0                and fuel_cell_efficiency<=1)
 
         #check electricity market locations
         if isinstance(electricity_location_string, str):
@@ -278,6 +286,15 @@ class FossilfreeDatabase:
         if syngen<0 or syngen>1:
             raise Exception('Share of synfuels must be between 0 and 1.', syngen, '\nCheck input.')
         
+        if electrolysis_efficiency<0:
+            raise Exception('Water splitting efficiency (electrolysis) must be larger than zero.', electrolysis_efficiency, '\nCheck input.')
+        elif electrolysis_efficiency>1:
+            print("Warning: Water splitting efficiency (electrolysis) larger than 1. This is theoretically possible, but technically very likely not possible. Consider change.", electrolysis_efficiency)
+
+        if fuel_cell_efficiency<0 or fuel_cell_efficiency>0.927:
+            raise Exception('Fuel cell efficiency must be between 0 and 0.927.', fuel_cell_efficiency, '\nCheck input.')
+
+        
         synfuel_split_dict={"biogen": biogen,
                             "syngen": syngen}
         
@@ -303,6 +320,8 @@ class FossilfreeDatabase:
         self.electricity_split        = electricity_split
         self.synfuel_split_dict       = synfuel_split_dict
         self.f_mat                    = materials_fossil_reduction_factor
+        self.nu_electrolysis          = electrolysis_efficiency
+        self.nu_fuel_cell             = fuel_cell_efficiency
 
     def reference_database_setup(self, ei_version='3.8', project='FFEI', username=None, password=None, biosphere_name = 'biosphere3', system_model='cutoff', biosphere_write_mode='patch'):
         """
@@ -408,8 +427,36 @@ class FossilfreeDatabase:
         self.altered_activities = add_biocoke_market(self.fossilfree_db, self.altered_activities, self.biosphere_db)
         
         self.merge_with_synfuel_database(other_db_name=other_db_name)
+        self.add_electrolysis_energy_input()
         
         print("Added new diesel market and biocoke market.")
+
+
+    def add_electrolysis_energy_input(self):
+        input_map = import_input_map()
+        H2_prod = self.fossilfree_db.get(input_map[self.ei_version]['H25bar'])
+        E_input = [act for act in self.fossilfree_db
+                    if 'electricity, low voltage' in act['name'] and act['location']==self.transport_location and act['unit']=='kilowatt hour' and 'industry' not in act['name']][0]
+
+        H2_prod.new_exchange(input=E_input,
+                            name=E_input['name'],
+                            amount=39.4/self.nu_electrolysis, #upper heating value of H2 is 39.4 kWh/kg
+                            unit=E_input['unit'],
+                            location=E_input['location'],
+                            type='technosphere',
+                            flow=self.fossilfree_db.get(E_input[1])["flow"]).save()
+        H2_prod.save()
+
+        #Variant2
+        H2_prod2 = self.fossilfree_db.get(input_map[self.ei_version]['H25bar2'])
+        for exc in H2_prod2.technosphere():
+            if exc.input['reference product']=='electricity, low voltage':
+                exc['amount'] == 39.4/self.nu_electrolysis #upper heating value of H2 is 39.4 kWh/kg
+                exc.save()
+                break
+        H2_prod2.save()
+        
+
 
     def merge_with_synfuel_database(self, other_db_name='synfuels'):
         """
@@ -486,6 +533,7 @@ class FossilfreeDatabase:
                                   ei_version = self.ei_version,
                                   nu_turnaround = self.nu_turnaround,
                                   d = self.d,
+                                  nu_fuel_cell = self.nu_fuel_cell,
                                   fossil_reduction_factor = self.f_e,
                                   fossil_identifiers = self.fossil_identifier,
                                   altered_activities = self.altered_activities,
@@ -572,5 +620,5 @@ class FossilfreeDatabase:
         
         print('Generating change report.')
         change_report  = get_change_report(self.fossilfree_db, self.altered_activities)
-        change_report.to_excel(path / 'results' /'change_report.xlsx')
-        print('Saved change report under:\n{}'.format(path / 'results' /'change_report.xlsx'))
+        change_report.to_excel(path / 'data' / 'results' /'change_report.xlsx')
+        print('Saved change report under:\n{}'.format(path / 'data' / 'results' /'change_report.xlsx'))
