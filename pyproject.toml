@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+ 
+[project]
+name = "fossilfree_ecoinvent"  # name on PyPI (can differ from module name)
+version = "0.1.0"
+description = "Tools to generate fossil-free ecoinvent-based LCI databases"
+readme = "README.md"
+requires-python = ">=3.9"
+ 
+authors = [
+  { name = "Hauke Schlesier"        , email = "hauke.schlesier@empa.ch" },
+  { name = "Carlos Gomez-Camacho"   , email = "carlos.gomez@empa.ch" }
+]
+ 
+license = { file = "LICENCE" }
+ 
+dependencies = [
+  "numpy",
+  "pandas",
+  "bw2data",
+  "bw2io",
+  "bw2calc",
+  "pyecospold",
+  "stats_arrays",
+  "carculator",
+  "carculator-truck",
+  "carculator-utils",
+  "openpyxl",
+  "tqdm"
+]
+ 
+[project.urls]
+Homepage = "https://github.com/hschlesier/fossilfree_ecoinvent"
+Repository = "https://github.com/hschlesier/fossilfree_ecoinvent"
+ 
+#[project.scripts]
+#fossilfree-ecoinvent = "fossilfree_ecoinvent.cli:main"
+ 
+# -----------------------------
+# Setuptools configuration
+# -----------------------------
+[tool.setuptools]
+package-dir = {"" = "src"}
+ 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["fossilfree_ecoinvent*"]
+ 
+[tool.setuptools.package-data]
+"fossilfree_ecoinvent" = ["data/*"]

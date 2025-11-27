@@ -1,0 +1,33 @@
+{"3.8":{
+    "PEM_op":"068966fecc1f2f9fdf240b63e4aa3561",
+    "PEMFC":"a6b871ff4fb638e98e148f02a96e5abb",
+    "SOFC":"35f657c14e704f279dd866415e1920eb",
+    "SOFC_maintenance":"46901af6dce00844e9ad1de2ba85ac32",
+    "H_station":"191122345e2273ad63c0f3e1ebd985ca",
+    "H25bar":"e82e5e9fb69a59695d71fd616c93c9e4", 
+    "H25bar2":"eb157148098a0a5efffc127f2d00a454",
+    "H700bar":"9d3cc9078fd1adb53d8d87ccf2933cdb",
+    "EAF":"9a081e247d908cb289edfab8a05d9ccd"
+},
+"3.9":{
+    "PEM_op":"068966fecc1f2f9fdf240b63e4aa3561",
+    "PEMFC":"a6b871ff4fb638e98e148f02a96e5abb",
+    "SOFC":"d54053a5c6af4c139ac79ef592eb5e99",
+    "SOFC_maintenance":"ccf8f2eca42a962d6ddc6021c0f49254",
+    "H_station":"191122345e2273ad63c0f3e1ebd985ca",
+    "H25bar":"e82e5e9fb69a59695d71fd616c93c9e4",
+    "H25bar2":"eb157148098a0a5efffc127f2d00a454",
+    "H700bar":"9d3cc9078fd1adb53d8d87ccf2933cdb",
+    "EAF":"c511faa15f7c7cdf49c9690577f76cf5"
+},
+"3.9.1":{
+    "PEM_op":"068966fecc1f2f9fdf240b63e4aa3561",
+    "PEMFC":"a6b871ff4fb638e98e148f02a96e5abb",
+    "SOFC":"d053f1b0998eae92cd5e77983cb6d097",
+    "SOFC_maintenance":"e0ae37ba24706317c9d846b4b77cf4c2",
+    "H_station":"191122345e2273ad63c0f3e1ebd985ca",
+    "H25bar":"e82e5e9fb69a59695d71fd616c93c9e4",
+    "H25bar2":"eb157148098a0a5efffc127f2d00a454",
+    "H700bar":"9d3cc9078fd1adb53d8d87ccf2933cdb",
+    "EAF":"ad00b3883953a16da9d78287fa2123cf"
+    }}

@@ -1,0 +1,31 @@
+diesel
+diesel, low-sulfur
+coke
+heavy fuel oil
+kerosene
+light fuel oil
+, oil
+liquefied petroleum gas
+natural gas,
+natural gas, high pressure
+natural gas, low pressure
+natural gas, low pressure, vehicle grade
+natural gas, medium pressure, vehicle grade
+natural gas, burned in gas motor, for storage
+natural gas, liquefied
+petrol, low-sulfur
+petrol, two-stroke blend
+petrol, unleaded
+petroleum
+propane
+petroleum coke
+hard coal
+coal gas
+lignite
+pitch
+methanol
+coal tar
+peat
+coal, aluminium industry
+natural gas, aluminium industry
+water pump operation, diesel

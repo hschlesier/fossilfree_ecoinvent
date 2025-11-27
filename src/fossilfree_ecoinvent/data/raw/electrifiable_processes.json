@@ -1,0 +1,17 @@
+{
+                "machine operation, diesel, < 18.64 kW, generators": "electricity, medium voltage",
+                "machine operation, diesel, < 18.64 kW, high load factor": "electricity, medium voltage",
+                "machine operation, diesel, < 18.64 kW, low load factor": "electricity, medium voltage",
+                "machine operation, diesel, < 18.64 kW, steady-state": "electricity, medium voltage",
+                "machine operation, diesel, < 18.64 kW, underground mining": "electricity, medium voltage",
+                "machine operation, diesel, >= 18.64 kW and < 74.57 kW, generators": "electricity, medium voltage",
+                "machine operation, diesel, >= 18.64 kW and < 74.57 kW, high load factor": "electricity, medium voltage",
+                "machine operation, diesel, >= 18.64 kW and < 74.57 kW, low load factor": "electricity, medium voltage",
+                "machine operation, diesel, >= 18.64 kW and < 74.57 kW, steady-state": "electricity, medium voltage",
+                "machine operation, diesel, >= 18.64 kW and < 74.57 kW, underground mining": "electricity, medium voltage",
+                "machine operation, diesel, >= 74.57 kW, generators": "electricity, medium voltage",
+                "machine operation, diesel, >= 74.57 kW, high load factor": "electricity, medium voltage",
+                "machine operation, diesel, >= 74.57 kW, low load factor": "electricity, medium voltage",
+                "machine operation, diesel, >= 74.57 kW, steady-state": "electricity, medium voltage",
+                "machine operation, diesel, >= 74.57 kW, underground mining": "electricity, medium voltage"
+}

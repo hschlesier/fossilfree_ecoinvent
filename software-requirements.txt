@@ -1,0 +1,21 @@
+# --- Core numerical stack ---
+numpy==1.26.4
+pandas==2.2.3
+ 
+# --- Brightway / LCA core (direct imports in your code) ---
+bw2data==3.6.6
+bw2io==0.8.12
+bw2calc==1.8.2
+pyecospold==3.5.3
+stats_arrays==0.7
+ 
+# --- Vehicle models used in transport.py ---
+carculator==1.7.1
+carculator-truck==0.3.6
+carculator-utils==1.3.4
+ 
+# --- Excel I/O (used in checks_and_balances.py) ---
+openpyxl==3.1.5
+ 
+# --- Progress bar utility ---
+tqdm==4.67.1
