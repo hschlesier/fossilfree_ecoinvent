@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
  
 [project]
-name = "fossilfree_ecoinvent"  # name on PyPI (can differ from module name)
+name = "fossilfree-ecoinvent"  # name on PyPI (can differ from module name)
 version = "0.1.0"
 description = "Tools to generate fossil-free ecoinvent-based LCI databases"
 readme = "README.md"
@@ -14,7 +14,7 @@ authors = [
   { name = "Carlos Gomez-Camacho"   , email = "carlos.gomez@empa.ch" }
 ]
  
-license = { file = "LICENCE" }
+license = { file = "LICENSE" }
  
 dependencies = [
   "numpy",
