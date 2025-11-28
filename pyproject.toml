@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
  
 [project]
 name = "fossilfree-ecoinvent"  # name on PyPI (can differ from module name)
-version = "0.1.4"
+version = "0.1.6"
 description = "Tools to generate fossil-free ecoinvent-based LCI databases"
 readme = "README.md"
 requires-python = ">=3.9,<3.13"
@@ -51,4 +51,4 @@ where = ["src"]
 include = ["fossilfree_ecoinvent*"]
  
 [tool.setuptools.package-data]
-"fossilfree_ecoinvent" = ["data/*"]
+fossilfree_ecoinvent = ["data/**"]

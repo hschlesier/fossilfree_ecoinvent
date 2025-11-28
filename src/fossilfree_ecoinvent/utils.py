@@ -11,8 +11,8 @@ def import_emission_factors():
     """
     Loads emission factors of fuels.
     """
-    parent_dir = Path.cwd().parent
-    emission_data        = pd.read_excel(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'emission_factors.xlsx', index_col=0)
+    DATA_DIR = Path(__file__).resolve().parent / "data"
+    emission_data        = pd.read_excel(DATA_DIR / 'raw' / 'emission_factors.xlsx', index_col=0)
     global emission_factors_dict
     emission_factors_dict = emission_data.T.to_dict()
     return emission_factors_dict

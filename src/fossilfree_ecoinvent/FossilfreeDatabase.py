@@ -467,7 +467,7 @@ class FossilfreeDatabase:
                    other_db:     other databases to be merged
         
         """
-        DATA_DIR = Path(__file__).resolve().parent
+        DATA_DIR = Path(__file__).resolve().parent / 'data'
         eidb     = self.fossilfree_db
         ei_version_nr = self.ei_version
         parent_db= eidb.name

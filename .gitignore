@@ -117,9 +117,8 @@ target/
 # Mypy cache
 .mypy_cache/
 
-# results
-data/results/
-!data/raw/
+scr/data/results/
+!scr/data/raw/
 
 # Specific files
 *carculator*
