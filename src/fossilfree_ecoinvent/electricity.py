@@ -2,8 +2,10 @@ import numpy as np
 from .checks_and_balances import track_changes
 from datetime import datetime
 from .heat import indices
+from pathlib import Path
 import uuid
 from .utils import progress_bar, flatten, regionalise_activity, import_input_map
+
 
 def roof_pv_market_setup(database, location, transformation_losses, altered_activities):
     """

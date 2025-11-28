@@ -23,8 +23,8 @@ importlib.reload(util)
 from .utils import migrate_exchanges, flatten, get_modified_fossil_reduction_factor, change_geographies, defossilize_biosphere_flows, add_biosphere_flows, output_to_self, comment_to_dict, add_technosphere_flows_to_activity, get_fuel_replacement_split, check_bio_or_synfuel, import_emission_factors, replace_fuel, import_synfuel_dict, import_fossil_identifiers, import_not_electrifiable_fuels
 
 def import_vehicles():
-    parent_dir = Path.cwd().parent
-    with open(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'vehicles.txt') as file:
+    DATA_DIR = Path(__file__).resolve().parent / "data"
+    with open(DATA_DIR /'raw'/ 'vehicles.txt') as file:
         vehicles = [line.rstrip() for line in file]
     return vehicles
 
@@ -42,7 +42,7 @@ def create_passenger_vehicles(car_year, database, ei_version, transport_location
     Returns:    None
                  
     """
-    parent_dir = Path.cwd().parent
+    DATA_DIR = Path(__file__).resolve().parent / "data"
 
     for act in [act for act in database if ('transport, passenger car, fuel cell electric' in act['name']
                                            or "transport, passenger car, battery electric" in act['name'])]:
@@ -67,11 +67,11 @@ def create_passenger_vehicles(car_year, database, ei_version, transport_location
         ic = cc.InventoryCalculation(cm.array)
 
         imp=ic.export_lci_to_excel(software_compatibility="brightway2",
-                               directory=parent_dir/ 'data' /'artifacts',
+                               directory=DATA_DIR/'artifacts',
                                ecoinvent_version=ei_version)
 
         date=str(datetime.now())[:10]
-        path = parent_dir/ 'scr' / 'fossilfree_ecoinvent' /'data'/'artifacts'/ 'carculator_inventory_export_{}_brightway2.xlsx'.format(date)
+        path = DATA_DIR /'artifacts'/ 'carculator_inventory_export_{}_brightway2.xlsx'.format(date)
 
         imp = bi.ExcelImporter(path)
         imp.apply_strategies()
@@ -114,8 +114,7 @@ def create_lorries(database, truck_year, ei_version, transport_location):
                 
     Returns:    None
     """
-    parent_dir = Path.cwd().parent
-
+    DATA_DIR = Path(__file__).resolve().parent / "data"
     for act in [act for act in database if 'transport, freight, lorry' in act['name']
                                            and any(kind in act["name"] for kind in ['battery', 'fuel cell'])]:
         print('----')
@@ -142,12 +141,12 @@ def create_lorries(database, truck_year, ei_version, transport_location):
 
         #export truck carculator db
         i=ic.export_lci_to_excel(software_compatibility="brightway2",
-                               directory=parent_dir/ 'data' /'artifacts',
+                               directory=DATA_DIR/'artifacts',
                                ecoinvent_version=ei_version)
 
         #import carculator db
         date=str(datetime.now())[:10]
-        path = parent_dir/ 'scr' / 'fossilfree_ecoinvent' /'data'/'artifacts'/  'carculator_inventory_export_{}_brightway2.xlsx'.format(date)
+        path = DATA_DIR /'artifacts'/  'carculator_inventory_export_{}_brightway2.xlsx'.format(date)
         i = bi.ExcelImporter(path) 
         i.apply_strategies()
         if ei_version!='3.8':
@@ -705,9 +704,10 @@ def scale_lorry_markets(database, lorry_type_split, code_dict, altered_activitie
     return altered_activities
 
 def get_train_traction_data():
-    parent_dir = Path.cwd().parent
+    DATA_DIR = Path(__file__).resolve().parent / "data"
+
     #https://treeze.ch/fileadmin/user_upload/downloads/Publications/Case_Studies/Mobility/544-LCI-Rail-Transport-Services-v2.0.pdf p. 17
-    traction_data = pd.read_excel(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'train_traction_data.xlsx', index_col=0)
+    traction_data = pd.read_excel(DATA_DIR /'raw'/ 'train_traction_data.xlsx', index_col=0)
     diesel_traction_pass   = traction_data['kg diesel / pkm'].to_dict()
     electric_traction_pass = traction_data['kWh / pkm'].to_dict()
     diesel_traction_good   = traction_data['kg diesel / tkm'].to_dict()

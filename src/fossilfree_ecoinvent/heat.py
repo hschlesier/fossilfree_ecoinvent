@@ -9,16 +9,18 @@ import json
 from .utils import add_biosphere_flows, flatten, indices, fossil_to_nonfossil_biosphere_flows, import_emission_factors, regionalise_activity, import_input_map
 
 def import_heat_classes():
-    parent_dir = Path.cwd().parent
+    PACKAGE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = PACKAGE_DIR / "data"
     # Import the dictionary from the JSON file
-    with open(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'heat_classes.json', "r") as json_file:
+    with open(DATA_DIR /'raw'/ 'heat_classes.json', "r") as json_file:
         global heat_dict
         heat_dict = json.load(json_file)
 
 def import_heat_keywords():
-    parent_dir = Path.cwd().parent
+    PACKAGE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = PACKAGE_DIR / "data"
     # Import the dictionary from the JSON file
-    with open(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'heat_keywords.json', "r") as json_file:
+    with open(DATA_DIR /'raw'/ 'heat_keywords.json', "r") as json_file:
         global keyword_dict
         keyword_dict = json.load(json_file)
 
@@ -36,7 +38,8 @@ def heat_markets_setup(database, database_bio , fossil_reduction_factor, heat_sp
     Returns:
         altered_activities:      dictionary of altered activities (for documentation)
     """
-    parent_dir = Path.cwd().parent
+    PACKAGE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = PACKAGE_DIR / "data"
     
     #create markets for biomethane, high pressure based on industrial furnace and biomethane, high pressure
     biomethane_codes=[]
@@ -158,7 +161,7 @@ def heat_markets_setup(database, database_bio , fossil_reduction_factor, heat_sp
     print("Added heat process with electric resistor.") 
    
     #create new global heat markets
-    file=pd.ExcelFile(parent_dir / 'data/raw/heat_processes_allocation.xlsx')
+    file=pd.ExcelFile(DATA_DIR / 'raw' / 'heat_processes_allocation.xlsx')
     sheets = file.sheet_names #get all sheet names
     for sheet in sheets:
         df = file.parse(sheet)
@@ -259,9 +262,10 @@ def get_heat_properties_from_activity(activity):
                 str:  string with properties, e.g., "0-60 °C, 1-10 MW"
     
     """
-    parent_dir = Path.cwd().parent
+    PACKAGE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = PACKAGE_DIR / "data"
     
-    file = pd.ExcelFile(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'heat_processes_allocation.xlsx')
+    file = pd.ExcelFile(DATA_DIR /'raw'/ 'heat_processes_allocation.xlsx')
     for sheet in file.sheet_names:
         df=file.parse(sheet)
         fossil_keys=[key.split(",")[1].strip()[1:33] for key in df.iloc[:,5].to_list() if type(key)==str]
@@ -290,11 +294,11 @@ def build_substitition_matrix(database, heat_split, ei_version):
     """
     print("Importing heat substitution matrix.")
 
-    parent_dir = Path.cwd().parent
+    DATA_DIR = Path(__file__).resolve().parent / "data"
     
     print("Allocating fossil heat processes to renewable ones.")
     matrices = []
-    file = pd.ExcelFile(parent_dir/'data/raw/heat_processes_allocation.xlsx')
+    file = pd.ExcelFile(DATA_DIR/'raw'/'heat_processes_allocation.xlsx')
     sheets = file.sheet_names
     for sheet in sheets:
         temp_level, power_level = sheet.replace('TEMP- ','').replace('PL- ','').split('|')
@@ -317,7 +321,7 @@ def build_substitition_matrix(database, heat_split, ei_version):
         matrices.append(level_matrix)
 
     df_matrix = pd.concat(matrices).fillna(0)
-    df_matrix.to_excel(parent_dir / 'data/raw/heat_substitution_matrix.xlsx', sheet_name="key")
+    df_matrix.to_excel(DATA_DIR / 'raw' / 'heat_substitution_matrix.xlsx', sheet_name="key")
 
     fossil_processes, ff_processes, matrix = read_heat_matrix()
     return fossil_processes, ff_processes, matrix
@@ -352,9 +356,9 @@ def substituting_tuples_to_matrix(subst_tuples_at_level):
     return matrix
 
 def read_heat_matrix(): 
-    parent_dir = Path.cwd().parent
+    DATA_DIR = Path(__file__).resolve().parent / "data"
     #read matrix
-    df=pd.read_excel(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'heat_substitution_matrix.xlsx', sheet_name="key", index_col=0)
+    df=pd.read_excel(DATA_DIR /'raw'/ 'heat_substitution_matrix.xlsx', sheet_name="key", index_col=0)
     df.index   = [eval(idx) for idx in df.index]
     df.columns = [eval(col) for col in df.columns]
     fossil_processes=df.index.to_list() #list of fossil processes / type: key

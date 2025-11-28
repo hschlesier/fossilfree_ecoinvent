@@ -117,27 +117,27 @@ def fossil_to_nonfossil_biosphere_flows(altered_activities, activity, biosphere3
 
 def import_fossil_identifiers():
     #fossil fuels
-    parent_dir = Path.cwd().parent
+    DATA_DIR = Path(__file__).resolve().parent / "data"
     global identifiers
     identifiers = []
-    with open(parent_dir / "src/fossilfree_ecoinvent/data/raw/fossil_identifier.txt", "r") as file:
+    with open(DATA_DIR /'raw'/'fossil_identifier.txt', "r") as file:
         for line in file:
             identifiers.append(line.strip())  # Remove newline characters
 
     return identifiers
 
 def import_input_map():
-    parent_dir = Path.cwd().parent
-    with open(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'input_mapping.json', 'r') as f:
+    DATA_DIR = Path(__file__).resolve().parent / "data"
+    with open(DATA_DIR /'raw'/ 'input_mapping.json', 'r') as f:
         input_map = json.load(f)
     return input_map
 
 def import_not_electrifiable_fuels():
     #fossil fuels
-    parent_dir = Path.cwd().parent
+    DATA_DIR = Path(__file__).resolve().parent / "data"
     global not_electrifiable_fuels
     not_electrifiable_fuels = []
-    with open(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'not_electrifiable_fuels.txt', "r") as file:
+    with open(DATA_DIR /'raw'/ 'not_electrifiable_fuels.txt', "r") as file:
         for line in file:
             not_electrifiable_fuels.append(line.strip())  # Remove newline characters
 
@@ -145,10 +145,10 @@ def import_not_electrifiable_fuels():
 
 def import_fossil_refinery_processes():
     #fossil fuel refinery processes and processes that are already isolated.
-    parent_dir = Path.cwd().parent    
+    DATA_DIR = Path(__file__).resolve().parent / "data"  
     global fossil_refinery_processes
     fossil_refinery_processes = []
-    with open(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'fossil_refinery_processes.txt', "r") as file:
+    with open(DATA_DIR /'raw'/ 'fossil_refinery_processes.txt', "r") as file:
         for line in file:
             fossil_refinery_processes.append(line.strip())  # Remove newline characters, former identifiers2
 
@@ -156,10 +156,10 @@ def import_fossil_refinery_processes():
 
 def import_not_electrifiable_processes():
     #processes that use carbon as an input in chemical reaction shall not be electrified
-    parent_dir = Path.cwd().parent
+    DATA_DIR = Path(__file__).resolve().parent / "data"
     global not_electrifiable_processes
     not_electrifiable_processes = []
-    with open(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ "not_electrifiable_processes.txt", "r") as file:
+    with open(DATA_DIR /'raw'/ "not_electrifiable_processes.txt", "r") as file:
         for line in file:
             not_electrifiable_processes.append(line.strip())  # Remove newline characters
 
@@ -167,18 +167,18 @@ def import_not_electrifiable_processes():
 
 def import_group_locations():
     #aggregated locations
-    parent_dir = Path.cwd().parent
+    DATA_DIR = Path(__file__).resolve().parent / "data"
     global group_locs
     group_locs = []
-    with open(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/  "group_locations.txt", "r") as file:
+    with open(DATA_DIR /'raw'/  "group_locations.txt", "r") as file:
         for line in file:
             group_locs.append(line.strip())  # Remove newline characters
     return group_locs
 
 def import_electrifiable_processes():
     #electrifiable processes
-    parent_dir = Path.cwd().parent
-    with open(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ "electrifiable_processes.json", "r") as json_file:
+    DATA_DIR = Path(__file__).resolve().parent / "data"
+    with open(DATA_DIR /'raw'/ "electrifiable_processes.json", "r") as json_file:
         global electrifiable_processes_dict
         electrifiable_processes_dict = json.load(json_file)
 
@@ -186,10 +186,10 @@ def import_electrifiable_processes():
 
 
 def import_synfuel_dict():
-    parent_dir = Path.cwd().parent
+    DATA_DIR = Path(__file__).resolve().parent / "data"
     global synfuel_dict
     global inverse_synfuel_dict
-    df           = pd.read_excel(parent_dir / 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/  'synfuel_dict.xlsx', index_col=0)
+    df           = pd.read_excel(DATA_DIR /'raw'/  'synfuel_dict.xlsx', index_col=0)
     synfuel_dict = {k: [item for item in v if item is not np.nan] for k, v in df.to_dict(orient='list').items()}
     inverse_synfuel_dict = { v: k for k, l in synfuel_dict.items() for v in l }
     return synfuel_dict
@@ -809,8 +809,8 @@ def migrate_flows(dataset, biosphere_map_dict, technosphere_map_dict):
     return dataset
 
 def get_biosphere3_map_dict(from_version='3.8', to_version='3.9'):
-    parent_dir = Path.cwd().parent
-    match_df_raw = pd.read_excel(parent_dir/ 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'biosphere_flow_mapping.xlsx', index_col=0)
+    DATA_DIR = Path(__file__).resolve().parent / "data"
+    match_df_raw = pd.read_excel(DATA_DIR /'raw'/ 'biosphere_flow_mapping.xlsx', index_col=0)
     match_df_raw['categories'] = [eval(val) for val in match_df_raw['categories']]
     match_df = match_df_raw.set_index(['{}_name'.format(from_version), 'categories'])[['{}_name'.format(to_version), '{}_code'.format(to_version)]].T
     match_df.index = ['name', 'code']
@@ -822,8 +822,8 @@ def get_biosphere3_map_dict(from_version='3.8', to_version='3.9'):
 
 
 def get_technosphere_map_dict(from_version='3.8', to_version='3.9'):
-    parent_dir = Path.cwd().parent
-    match_df_raw = pd.read_excel(parent_dir/ 'scr' / 'fossilfree_ecoinvent' /'data'/'raw'/ 'technosphere_mapping.xlsx')
+    DATA_DIR = Path(__file__).resolve().parent / "data"
+    match_df_raw = pd.read_excel(DATA_DIR /'raw'/ 'technosphere_mapping.xlsx')
     match_df = match_df_raw.set_index(['name_{}'.format(from_version), 'reference product_{}'.format(from_version), 'location_{}'.format(from_version)])[['name_{}'.format(to_version), 'reference product_{}'.format(to_version), 'location_{}'.format(to_version)]].T
     match_df.index = ['name', 'reference product', 'location']
     map_dict = match_df.to_dict()

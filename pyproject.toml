@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
  
 [project]
 name = "fossilfree-ecoinvent"  # name on PyPI (can differ from module name)
-version = "0.1.2"
+version = "0.1.4"
 description = "Tools to generate fossil-free ecoinvent-based LCI databases"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.13"
  
 authors = [
   { name = "Hauke Schlesier"        , email = "hauke.schlesier@empa.ch" },
@@ -28,7 +28,8 @@ dependencies = [
   "carculator-truck==0.3.6",
   "carculator-utils==1.3.4",
   "openpyxl==3.1.5",
-  "tqdm==4.67.1"
+  "tqdm==4.67.1",
+  "lxml>=4.9.3"
 ]
  
 [project.urls]

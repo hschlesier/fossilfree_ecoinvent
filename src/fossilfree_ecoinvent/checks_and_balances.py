@@ -35,8 +35,11 @@ def get_classification_dict():
     """
     Loads dictionary of currently unclassified activities and their ISIC classification.
     """
-    parent_dir = Path.cwd().parent
-    filepath =      parent_dir / 'data/raw/unclassified_activities.xlsx'
+    # Absolute path to the current file
+    PACKAGE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = PACKAGE_DIR / "data"
+    
+    filepath =      DATA_DIR /'raw' / 'unclassified_activities.xlsx'
     unclassified_df = pd.read_excel(filepath)
     classification_dict = unclassified_df.set_index(['name', 'product'])[['ISIC rev. 4']].to_dict()
     return classification_dict

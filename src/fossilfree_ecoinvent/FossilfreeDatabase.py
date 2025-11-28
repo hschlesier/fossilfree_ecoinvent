@@ -120,7 +120,7 @@ class FossilfreeDatabase:
         self.nu_electrolysis = electrolysis_efficiency
         self.nu_fuel_cell    = fuel_cell_efficiency
 
-    def load_parameters(self, path=Path.cwd().parent, filename='input_parameters_v2.xlsx'):
+    def load_parameters(self, path=Path(__file__).resolve().parent, filename='input_parameters_v391.xlsx'):
         df = pd.read_excel(path / filename)
 
         # asigning the inputs to variables
@@ -366,10 +366,10 @@ class FossilfreeDatabase:
         """
         import os
 
-        parent_dir = Path.cwd().parent
+        DATA_DIR = Path(__file__).resolve().parent / "data"
 
         biosphere_db = self.biosphere_db
-        with open(parent_dir/'src'/'fossilfree_ecoinvent'/'data'/'raw'/"biosphere3_additions.json", "r") as json_file:
+        with open( DATA_DIR /'raw'/"biosphere3_additions.json", "r") as json_file:
             add_bio_data = json.load(json_file)
         for ds in add_bio_data:
             try:
@@ -467,7 +467,7 @@ class FossilfreeDatabase:
                    other_db:     other databases to be merged
         
         """
-        parent_dir = Path.cwd().parent
+        DATA_DIR = Path(__file__).resolve().parent
         eidb     = self.fossilfree_db
         ei_version_nr = self.ei_version
         parent_db= eidb.name
@@ -480,10 +480,10 @@ class FossilfreeDatabase:
         except:
             if other_db_name not in bd.databases:
                 try:
-                    path = os.path.join(parent_dir/'src'/'fossilfree_ecoinvent'/'data'/'raw'/ '{}.xlsx'.format(other_db_name))
+                    path = os.path.join(DATA_DIR/'raw'/ '{}.xlsx'.format(other_db_name))
                     imp = bi.ExcelImporter(path)
                 except:
-                    raise Exception('Could not find synfuel database here: {}'.format(parent_dir/'src'/'fossilfree_ecoinvent'/'data'/'raw'/ '{}.xlsx'.format(other_db_name)))
+                    raise Exception('Could not find synfuel database here: {}'.format(DATA_DIR /'raw'/ '{}.xlsx'.format(other_db_name)))
                 imp.apply_strategies()
                 if ei_version_nr!='3.8':
                     new_data = migrate_exchanges(imp.data.copy(), from_version='3.8', to_version=self.ei_version)
@@ -617,8 +617,7 @@ class FossilfreeDatabase:
                             base_db_name = self.base_db.name)
 
     def save_change_report(self, path = Path.cwd().parent):
-        
         print('Generating change report.')
         change_report  = get_change_report(self.fossilfree_db, self.altered_activities)
-        change_report.to_excel(path/'src'/'fossilfree_ecoinvent'/'data'/'results'/'change_report.xlsx')
-        print('Saved change report under:\n{}'.format(path/'src'/'fossilfree_ecoinvent'/'data'/'results'/'change_report.xlsx'))
+        change_report.to_excel(path /'change_report.xlsx')
+        print('Saved change report under:\n{}'.format(path/'change_report.xlsx'))
