@@ -24,4 +24,4 @@ You can install **Fossil-free ecoinvent** either from [PyPI](https://pypi.org/) 
 Simply install using `pip`:
 
 ```bash
-pip install fossilfree-ecoinvent
+pip install fossilfree_ecoinvent
