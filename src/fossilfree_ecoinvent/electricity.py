@@ -353,12 +353,15 @@ def not_null_split_only(activities, electricity_split):
     """
     Filters activities, where share in scaled market not zero.
     """
-    for idx in indices(list(electricity_split.values()), 0, '=='):
-        keywords = electricity_split[list(electricity_split.keys())[idx]]
-        activities=[act for act in activities if not any([keyword in act['name'] for keyword in keywords])]        
+    try:
+        for idx in indices(list(electricity_split.values()), 0, '=='):
+            keywords = [list(electricity_split.keys())[idx]]
+            activities=[act for act in activities if not any([keyword in act['name'] for keyword in keywords])] 
+    except:
+        raise Exception(activities)
     return activities
 
-def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifiers, electricity_split, pv_and_stor_market_code, altered_activities):
+def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifiers, electricity_split,     pv_and_stor_market_code, altered_activities):
     """
     Scaling down fossil electricity sources in electricity markets and adding and scaling up renewable ones.
     
@@ -372,13 +375,15 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
     returns:
         altered_activities: updated dictionary of altered activities
     """
-    electricity_productions = [act for act in database if 'electricity production' in act['name']
-                                               and 'heat and power co-generation' in act['name']
+    electricity_productions = [act for act in database if ('electricity production' in act['name']
+                                               or 'heat and power co-generation' in act['name'])
                                                and act['location']==location
                                                and 'kilowatt hour' in act['unit']
                                               ]
     
+    
     electricity_productions = not_null_split_only(electricity_productions, electricity_split) #only productions with split > 0
+
     
     for act in [act for act in database
             if ('market for electricity, high voltage' in act['name']
@@ -412,7 +417,7 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
                     supply_shortage += ex_amount - new_ex_amount
 
         if supply_shortage!=0:
-            voltage=','.join(source_act["reference product"].split(',')[:2])
+            voltage=','.join(act["reference product"].split(',')[:2])
             
             if electricity_productions==[]:
                 old_location = location
@@ -428,7 +433,7 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
                           and "onshore" in act["name"]
                           and act["location"]==location
                           and act["reference product"]==voltage]
-            
+                        
             #wind offshore
             wind_off_acts=[act for act in sub_database
                           if act["unit"]=="kilowatt hour"
@@ -483,7 +488,6 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
             pv_market = database.get(pv_and_stor_market_code)
             
             subs_acts=[[pv_market], wind_on_acts, wind_off_acts, hydro_acts, geothermal_acts, biomass_acts, nuclear_acts, solar_acts]
-
             
             if flatten(subs_acts)==[]: #if there are no electricity production processes (e.g. RER), take market group
                 try:
@@ -519,8 +523,7 @@ def scale_exchanges(database, location, fossil_reduction_factor, fossil_identifi
                                          amount=mode_split/len(mode_acts),
                                          unit="kilowatt hour",
                                          type='technosphere').save()
-                          
-        altered_activities = track_changes(act, altered_activities, 'scaling')
+    altered_activities = track_changes(act, altered_activities, 'scaling')  
     return altered_activities
     
 def check_all_non_electricity_activities(database, fossil_reduction_factor, fossil_identifiers, altered_activities):
